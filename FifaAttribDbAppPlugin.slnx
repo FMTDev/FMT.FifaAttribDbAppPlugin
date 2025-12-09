@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/SolutionFiles/">
+    <File Path=".gitignore" />
+    <File Path="FMTIcon24.png" />
+    <File Path="LICENSE.md" />
+    <File Path="README.md" />
+  </Folder>
+  <Project Path="FifaAttribDbAppPlugin/FifaAttribDbAppPlugin.csproj" />
+  <Project Path="FifaAttribDbAppPluginTests/FifaAttribDbAppPluginTests.csproj" />
+</Solution>
