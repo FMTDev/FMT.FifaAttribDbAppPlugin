@@ -39,7 +39,7 @@ namespace FifaAttribDbAppPlugin.AttribDb
             this.ReadBytes(32); // Skip header
             for (var i = 0; i < countOfTypes; i++)
             {
-                Types.Add(new FIFAAttribDbType(this.ReadNullTerminatedString()));
+                //Types.Add(new FIFAAttribDbType(this.ReadNullTerminatedString()));
             }
             this.Pad(16);
             for (var i = 0; i < countOfUnk1; i++)

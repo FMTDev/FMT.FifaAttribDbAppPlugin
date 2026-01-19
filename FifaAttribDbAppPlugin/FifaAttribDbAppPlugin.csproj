@@ -7,6 +7,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="FieldNameHashes.csv" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="FieldNameHashes.csv" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="FMT.Core" Version="2025.105.1" />
   </ItemGroup>
 

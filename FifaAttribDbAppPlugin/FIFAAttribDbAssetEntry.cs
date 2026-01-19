@@ -1,4 +1,5 @@
-﻿using FMT.Hash;
+﻿using FifaAttribDbAppPlugin;
+using FMT.Hash;
 using FMT.PluginInterfaces;
 using FMT.PluginInterfaces.Assets;
 using System;
@@ -39,19 +40,21 @@ namespace FMT.Core.Readers.FIFA
         public string SBFileLocation { get; set; }
         public bool IsAdded { get; set  ; }
 
+        public FIFAAttribDbType AttribDbType { get; set; }
+
         public string GetDisplayName()
         {
-            throw new NotImplementedException();
+            return AttribDbType.Name;
         }
 
         public string GetFilename()
         {
-            throw new NotImplementedException();
+            return AttribDbType.Name;
         }
 
         public string GetPath()
         {
-            throw new NotImplementedException();
+            return $"{AttribDbType.FolderName}/{AttribDbType.Name}";
         }
 
         public void LinkAsset(IAssetEntry entry)

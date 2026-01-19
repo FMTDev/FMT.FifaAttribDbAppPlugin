@@ -9,20 +9,26 @@ namespace FifaAttribDbAppPlugin
     {
         public string Name { get; set; }
 
-        public int HashInt { get; set; }
-
         public ulong HashLong { get; set; }
 
-        public FIFAAttribDbType(string name)
+        public string FolderName { get; set; }
+
+        public ulong FolderHash { get; set; }
+
+        public List<FIFAAttribDbField> Fields { get; set; } = new List<FIFAAttribDbField>();
+
+        public FIFAAttribDbType(string name, ulong hash, string folderName, ulong folderHash, List<FIFAAttribDbField> fields)
         {
             Name = name;
-            HashInt = Fnv1.HashString(name);
-            HashLong = Fnv64.FNV64_String8_Lower(name);
+            HashLong = hash;
+            FolderName = folderName;
+            FolderHash = folderHash;
+            Fields = fields;
         }
 
         public override string ToString()
         {
-            return $"{Name}:{HashInt}:{HashLong}";
+            return $"{FolderName}/{Name}:{HashLong}";
         }
     }
 }
