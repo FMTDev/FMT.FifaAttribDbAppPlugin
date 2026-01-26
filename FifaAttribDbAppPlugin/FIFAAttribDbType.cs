@@ -1,7 +1,4 @@
-﻿using FMT.Hash;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.ObjectModel;
 
 namespace FifaAttribDbAppPlugin
 {
@@ -31,4 +28,38 @@ namespace FifaAttribDbAppPlugin
             return $"{FolderName}/{Name}:{HashLong}";
         }
     }
+
+    public class EditableTypeViewModel
+    {
+        public string Name { get; }
+        public string FolderName { get; }
+        public ulong HashLong { get; }
+        public ulong FolderHash { get; }
+
+        public ObservableCollection<EditableFieldViewModel> Fields { get; }
+
+        public EditableTypeViewModel(FIFAAttribDbType type)
+        {
+            Name = type.Name;
+            FolderName = type.FolderName;
+            HashLong = type.HashLong;
+            FolderHash = type.FolderHash;
+
+            Fields = new ObservableCollection<EditableFieldViewModel>(
+                type.Fields.Select(f => new EditableFieldViewModel(f))
+            );
+        }
+
+        public FIFAAttribDbType ToModel()
+        {
+            return new FIFAAttribDbType(
+                Name,
+                HashLong,
+                FolderName,
+                FolderHash,
+                Fields.Select(f => new FIFAAttribDbField(f.Name, f.ToBytes(), f.Hash, (long)f.FieldType)).ToList()
+            );
+        }
+    }
+
 }

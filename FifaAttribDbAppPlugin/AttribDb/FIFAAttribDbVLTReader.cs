@@ -1,9 +1,4 @@
 ﻿using FMT.FileTools;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace FifaAttribDbAppPlugin.AttribDb
 {
@@ -56,14 +51,20 @@ namespace FifaAttribDbAppPlugin.AttribDb
                 //    hashes.Add(this.ReadULong());
                 //}
                 var unk6 = this.ReadLong();
-                List<FIFAAttribDbField> fields = new ();
+                List<FIFAAttribDbField> fields = new();
                 for (var iField = 0; iField < unk1; iField++)
                 {
                     var fieldHash = this.ReadULong();
+#if DEBUG
+                    if (fieldHash == 17011006820318417859)
+                    {
+
+                    }
+#endif
                     var fieldName = FieldNameHashLoader.Load().TryGetValue(fieldHash, out var name) ? name : $"Unknown_{fieldHash:X16}";
                     var fieldValue = this.ReadBytes(8);
                     var fieldType = this.ReadLong();
-                    fields.Add(new FIFAAttribDbField(fieldName, fieldValue, fieldHash));
+                    fields.Add(new FIFAAttribDbField(fieldName, fieldValue, fieldHash, fieldType));
                 }
 
                 if (true)

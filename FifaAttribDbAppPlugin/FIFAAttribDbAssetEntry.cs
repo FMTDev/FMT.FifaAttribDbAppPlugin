@@ -2,30 +2,25 @@
 using FMT.Hash;
 using FMT.PluginInterfaces;
 using FMT.PluginInterfaces.Assets;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace FMT.Core.Readers.FIFA
+namespace FifaAttribDbAppPlugin
 {
     public class FIFAAttribDbAssetEntry : IAssetEntry
     {
         public string Name { get; set; }
 
-        public bool IsModified => throw new NotImplementedException();
+        public bool IsModified { get; set; }
 
-        public bool IsIndirectlyModified => throw new NotImplementedException();
+        public bool IsIndirectlyModified { get; set; }
 
         public Sha1 Sha1 { get; set; }
         public IModifiedAssetEntry ModifiedEntry { get; set; }
 
-        public bool HasModifiedData => throw new NotImplementedException();
+        public bool HasModifiedData { get; set; }
 
         public long OriginalSize { get; set; }
 
-        public List<int> Bundles => throw new NotImplementedException();
+        public List<int> Bundles { get; set; }
 
         public string ExtraInformation { get; set; }
         public string Type { get; set; }
@@ -38,7 +33,7 @@ namespace FMT.Core.Readers.FIFA
         public string TOCFileLocation { get; set; }
         public AssetDataLocation Location { get; set; }
         public string SBFileLocation { get; set; }
-        public bool IsAdded { get; set  ; }
+        public bool IsAdded { get; set; }
 
         public FIFAAttribDbType AttribDbType { get; set; }
 
@@ -54,12 +49,17 @@ namespace FMT.Core.Readers.FIFA
 
         public string GetPath()
         {
-            return $"{AttribDbType.FolderName}/{AttribDbType.Name}";
+            return $"{AttribDbType.FolderName}";
         }
 
         public void LinkAsset(IAssetEntry entry)
         {
             throw new NotImplementedException();
+        }
+
+        public override string ToString()
+        {
+            return AttribDbType.ToString();
         }
     }
 }

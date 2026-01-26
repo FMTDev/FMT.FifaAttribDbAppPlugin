@@ -5,6 +5,7 @@
     <File Path="LICENSE.md" />
     <File Path="README.md" />
   </Folder>
+  <Project Path="FifaAttribDbAppPlugin.WPF/FifaAttribDbAppPlugin.WPF.csproj" Id="4b874620-3a09-4ecc-a878-bf98a03a4068" />
   <Project Path="FifaAttribDbAppPlugin/FifaAttribDbAppPlugin.csproj" />
   <Project Path="FifaAttribDbAppPluginTests/FifaAttribDbAppPluginTests.csproj" />
 </Solution>

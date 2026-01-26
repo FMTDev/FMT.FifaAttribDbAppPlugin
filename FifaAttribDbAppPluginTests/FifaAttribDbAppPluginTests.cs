@@ -1,7 +1,6 @@
 ﻿using FifaAttribDbAppPlugin;
 using FifaAttribDbAppPlugin.AttribDb;
 using FifaAttribDbAppPlugin.AttribDbGameplay;
-using FMT.Core.Readers.FIFA;
 using FMT.FileTools;
 
 namespace FifaAttribDbAppPluginTests
@@ -44,7 +43,9 @@ namespace FifaAttribDbAppPluginTests
             EmbeddedResourceHelper.GetEmbeddedResourceByName("Legacy.FIFA17.AttribDbGameplay.attribdb.VLT").CopyTo(msAttribDb_Data);
             //new FIFAAttribDbGameplayVLTReader(msAttribDb_Data.ToArray());
 
-            new FIFAAttribDbService().Load(msAttribDb_Data.ToArray());
+            var service = new FIFAAttribDbService();
+            service.Load(msAttribDb_Data.ToArray());
+            _ = service.Types;
         }
     }
 }

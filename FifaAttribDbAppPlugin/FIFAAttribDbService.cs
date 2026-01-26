@@ -1,8 +1,8 @@
 ﻿using FifaAttribDbAppPlugin.AttribDb;
 using FifaAttribDbAppPlugin.AttribDbGameplay;
-using FMT.Core.Readers.FIFA;
 using FMT.FileTools;
 using FMT.Hash;
+using FMT.Models.Assets.AssetEntry.Entries;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -15,6 +15,10 @@ namespace FifaAttribDbAppPlugin
         public FIFAAttribDbService()
         {
         }
+
+        //public FIFAAttribDbService(IAssetEntryServiceCollectionProvider assetEntryServiceCollectionProvider)
+        //{
+        //}
 
 
         public List<FIFAAttribDbAssetEntry> Types { get; } = new List<FIFAAttribDbAssetEntry>();
@@ -51,7 +55,7 @@ namespace FifaAttribDbAppPlugin
                     Type = "FIFA AttribDbGameplay",
                     Size = 0,
                     OriginalSize = 0,
-                    Sha1 = Sha1.Create(Encoding.UTF8.GetBytes(type.Name))
+                    Sha1 = Sha1.Create(Encoding.UTF8.GetBytes(type.Name)),
                 };
                 Types.Add(entry);
             }
