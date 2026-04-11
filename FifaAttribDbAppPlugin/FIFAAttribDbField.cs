@@ -1,11 +1,15 @@
-﻿using System.ComponentModel;
+﻿using FMT.PluginInterfaces.Assets;
+using FMT.ServicesManagers;
+using FMT.ServicesManagers.Interfaces;
+using System.ComponentModel;
 
 namespace FifaAttribDbAppPlugin
 {
     public enum FifaAttribDbFieldType : ulong
     {
-        Int32,
+        Int32 = 0,
         FloatCurve = 1,
+        FloatCurve2 = 2,
         Int64,
         Float = 4194304,
         Bool,
@@ -14,77 +18,75 @@ namespace FifaAttribDbAppPlugin
         Array = 131072
     }
 
-    public struct FIFAAttribDbField
+    public class FIFAAttribDbField : INotifyPropertyChanged
     {
+        public IAssetEntry ParentEntry { get; set; }
         public string Name { get; set; }
 
         public ulong Hash { get; set; }
 
-        public byte[] Value { get; set; }
+        public object Value
+        {
+            get
+            {
+                // Return ModifiedValue if it exists, otherwise return OriginalValue
+                if (ModifiedValue != null)
+                    return ModifiedValue;
+
+                return OriginalValue;
+            }
+
+            set
+            {
+
+                // Set OriginalValue if it's null, otherwise set ModifiedValue
+                if (OriginalValue == null)
+                {
+                    OriginalValue = value;
+                }
+                else
+                {
+                    ModifiedValue = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value)));
+
+                    if (SingletonService.Instantiated<IAssetManagementService>())
+                    {
+                        SingletonService.GetInstance<IAssetManagementService>().Logger?.Log($"Field Modified: {Name} | Original: {OriginalValue} | Modified: {ModifiedValue}");
+                        SingletonService.GetInstance<IAssetManagementService>().ModifyEntry(ParentEntry, null);
+                    }
+                }
+            }
+
+        }
+
+        public object OriginalValue { get; set; }
+
+        public object ModifiedValue { get; set; }
 
         public FifaAttribDbFieldType FieldType { get; set; }
 
-        public FIFAAttribDbField(string name, byte[] value, ulong hash, long fieldType)
+        public long? BinaryFileOffset { get; set; }
+
+        public long VaultValueOffset { get; set; }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        public FIFAAttribDbField(string name, object value, ulong hash, long fieldType, long vaultValueOffset, long? binaryFileOffset = null)
         {
             Name = name;
-            Value = value;
             Hash = hash;
             FieldType = (FifaAttribDbFieldType)fieldType;
+            VaultValueOffset = vaultValueOffset;
+            BinaryFileOffset = binaryFileOffset;
+
+            Value = value;
+
         }
 
         public override string ToString()
         {
             return $"{Name}:{FieldType}:{Hash}";
         }
-    }
-
-    public class EditableFieldViewModel : INotifyPropertyChanged
-    {
-        public string Name { get; }
-        public ulong Hash { get; }
-
-        private object _value;
-
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        public object Value
-        {
-            get => _value;
-            set
-            {
-                _value = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(Name));
-            }
-        }
-
-        public FifaAttribDbFieldType FieldType { get; }
-
-
-        public EditableFieldViewModel(FIFAAttribDbField field)
-        {
-            Name = field.Name;
-            Hash = field.Hash;
-            //Value = ConvertFromBytes(field.Value);
-            FieldType = field.FieldType;
-            switch (FieldType)
-            {
-                case FifaAttribDbFieldType.Float:
-                    Value = BitConverter.ToSingle(new ReadOnlySpan<byte>(field.Value));
-                    break;
-                case FifaAttribDbFieldType.Array:
-                    break;
-            }
-        }
-
-        public byte[] ToBytes()
-        {
-            //return ConvertToBytes(Value);
-            return null;
-        }
-
-        // Your conversion logic here...
-
-
     }
 
 }

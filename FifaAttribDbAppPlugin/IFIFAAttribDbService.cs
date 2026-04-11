@@ -1,7 +1,11 @@
-﻿namespace FifaAttribDbAppPlugin
+﻿using FMT.ServicesManagers.AssetEntryServicing;
+
+namespace FifaAttribDbAppPlugin
 {
-    public interface IFIFAAttribDbService
+    public interface IFIFAAttribDbService : IAssetEntryService
     {
-        public void Load(byte[] vaultData);
+        public List<FIFAAttribDbAssetEntry> Assets { get; }
+
+        public void Load(byte[] vaultData, byte[] binaryData);
     }
 }

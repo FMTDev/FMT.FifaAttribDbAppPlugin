@@ -13,65 +13,143 @@ namespace FifaAttribDbAppPlugin.AttribDb
         public FIFAAttribDbVLTReader(byte[] vltData) : base(vltData)
         {
             this.Position = 0;
-            this.ReadBytes(16); // Skip header
-            this.ReadBytes(16); // Skip header
-            this.ReadBytes(16); // Skip header
-            this.ReadBytes(16); // Skip header
+            this.ReadBytes(32); // Skip header
+            this.ReadBytes(4); // Skip header
+            var typeCount = this.ReadInt() * 2; // Type Count
             this.ReadBytes(8); // Skip header
-            this.ReadNullTerminatedString(); // attribdb.vlt
-            this.ReadNullTerminatedString(); // attribdb.bin
+            this.ReadBytes(16); // Skip header
+            var unknownInt = this.ReadInt();
+            var unknownInt2 = this.ReadInt();
+            var attribdbvltString = this.ReadNullTerminatedString(); // attribdb.vlt
+            var attribdbbinString = this.ReadNullTerminatedString(); // attribdb.bin
+            if (!attribdbbinString.Equals("attribdb.bin", StringComparison.OrdinalIgnoreCase))
+                throw new Exception("FifaAttribDbVlt didn't read correctly");
             this.Pad(16);
             this.ReadInt();
             this.ReadInt();
 
-            for (var i = 0; i < 80; i++)
+            Dictionary<long, ulong> vaultValueOffsetToFieldHash = new Dictionary<long, ulong>();
+            Dictionary<ulong, Dictionary<ulong, FIFAAttribDbField>> fieldHashToDbFieldByType = new Dictionary<ulong, Dictionary<ulong, FIFAAttribDbField>>();
+
+            while (true)
             {
-                var startOfData = this.Position;
+                var fileNameHash = this.ReadULong();
+                if (23709384994894 == fileNameHash)
+                {
+                    this.Position -= 8;
+                    break;
+                }
+
+                long startOfData = this.Position;
                 this.Position = startOfData;
                 // File Name -> Balance
-                var fileNameHash = this.ReadULong(); // Hash D9 76 8E 74 05 8D FD 7F = Balance
+                //fileNameHash = this.ReadULong(); // Hash D9 76 8E 74 05 8D FD 7F = Balance
                 var fileName = FIFAAttribDbFileNameHashDictionary.FileNameHash.TryGetValue(fileNameHash, out var fn) ? fn : $"Unknown_{fileNameHash:X16}";
                 // Folder Name -> Kick_Error
                 var folderNameHash = this.ReadULong(); // Hash 82 7A B2 FD 55 85 99 44 = Kick_Error
                 var folderName = FIFAAttribDbFileNameHashDictionary.FileNameHash[folderNameHash];
-                this.ReadLong(); // 0 data
-                var unk1 = this.ReadInt();
-                var unk2 = this.ReadInt();
-                var unk3 = this.ReadInt();
+
+                fieldHashToDbFieldByType.Add(folderNameHash + fileNameHash, new Dictionary<ulong, FIFAAttribDbField>());
+
+
+                var alwaysZero0 = this.ReadLong(); // 0 data
+                var fieldCount = this.ReadInt();
+                var alwaysZero1 = this.ReadInt();
+                var fieldCount2 = this.ReadInt();
                 var unkCount = this.ReadUShort();
-                var unkCount2 = this.ReadUShort();
-                //var unk5 = this.ReadLong();
-                List<ulong> hashes = new List<ulong>();
-                for (var iHash = 0; iHash < unkCount2; iHash++)
+                var hashCount = this.ReadUShort();
+
+                List<byte[]> hashBytes = new List<byte[]>();
+                for (var iHash = 0; iHash < hashCount; iHash++)
                 {
-                    hashes.Add(this.ReadULong());
+                    hashBytes.Add(this.ReadBytes(8));
                 }
-                //for (var iHash = 0; iHash < unkCount2; iHash++)
-                //{
-                //    hashes.Add(this.ReadULong());
-                //}
+
+                List<ulong> hashes = new List<ulong>();
+                for (var iHash = 0; iHash < hashCount; iHash++)
+                {
+                    var uLongHash = BitConverter.ToUInt64(hashBytes[iHash]);
+#if DEBUG
+                    if (uLongHash == 10368380999018116831)
+                    {
+
+                    }
+#endif 
+                    hashes.Add(uLongHash);
+                }
+
+#if DEBUG
+                if (hashes.Count != 0)
+                {
+
+                }
+
+
+#endif
+
                 var unk6 = this.ReadLong();
                 List<FIFAAttribDbField> fields = new();
-                for (var iField = 0; iField < unk1; iField++)
+
+                for (var iField = 0; iField < fieldCount; iField++)
                 {
-                    var fieldHash = this.ReadULong();
+                    var fieldHashHex = this.ReadBytes(8);
+                    var fieldHash = BitConverter.ToUInt64(fieldHashHex);
 #if DEBUG
                     if (fieldHash == 17011006820318417859)
                     {
 
                     }
+                    if (fieldHash == 10368380999018116831)
+                    {
+
+                    }
 #endif
                     var fieldName = FieldNameHashLoader.Load().TryGetValue(fieldHash, out var name) ? name : $"Unknown_{fieldHash:X16}";
+                    var vaultValueOffset = this.Position;
+                    vaultValueOffsetToFieldHash.Add(vaultValueOffset, fieldHash);
                     var fieldValue = this.ReadBytes(8);
                     var fieldType = this.ReadLong();
-                    fields.Add(new FIFAAttribDbField(fieldName, fieldValue, fieldHash, fieldType));
+
+                    object fieldValueObj = null;
+
+                    switch ((FifaAttribDbFieldType)fieldType)
+                    {
+                        case FifaAttribDbFieldType.Float:
+                            fieldValueObj = BitConverter.ToSingle(new ReadOnlySpan<byte>(fieldValue));
+                            break;
+                        case FifaAttribDbFieldType.Int32:
+                            fieldValueObj = BitConverter.ToInt32(new ReadOnlySpan<byte>(fieldValue));
+                            break;
+                        case FifaAttribDbFieldType.Int64:
+                            fieldValueObj = BitConverter.ToInt64(new ReadOnlySpan<byte>(fieldValue));
+                            break;
+                        case FifaAttribDbFieldType.Array:
+                            break;
+                        case FifaAttribDbFieldType.FloatCurve:
+                            break;
+                    }
+
+                    // Create DbField
+                    var dbField = new FIFAAttribDbField(fieldName, fieldValueObj, fieldHash, fieldType, vaultValueOffset);
+                    fields.Add(dbField);
+                    fieldHashToDbFieldByType[folderNameHash + fileNameHash].Add(fieldHash, dbField);
                 }
 
                 if (true)
                 {
                 }
 
-                ListOfDbTypes.Add(new FIFAAttribDbType(fileName, fileNameHash, folderName, folderNameHash, fields));
+                long sizeOfData = this.Position - startOfData;
+
+                long positionBeforeReadingData = this.Position;
+                this.Position = startOfData;
+                var dataInVault = this.ReadBytes((int)sizeOfData);
+
+                this.Position = positionBeforeReadingData;
+                var dbType = new FIFAAttribDbType(fileName, fileNameHash, folderName, folderNameHash, startOfData, dataInVault, fields);
+                dbType.Hashes = hashes;
+                ListOfDbTypes.Add(dbType);
+
             }
 
             if (true)
@@ -79,7 +157,37 @@ namespace FifaAttribDbAppPlugin.AttribDb
 
             }
 
-            // 108112
+            var endOfTypeDefinitionOffset = this.Position;
+
+            var npxe = this.ReadULong(); // 23709384994894
+            var countOfTypesAgain = this.ReadUInt();
+            this.Pad(16);
+
+            for (var i = 0; i < countOfTypesAgain; i++)
+            {
+                var hash1 = this.ReadULong();
+                var hash2 = this.ReadULong();
+                var countOrOffset1 = this.ReadUInt();
+                var countOrOffset2 = this.ReadUInt();
+            }
+
+            this.Pad(16);
+            this.ReadUInt(); // NrtP
+
+            _ = this.Position;
+            var sizeOfArrayData = this.ReadInt();
+            while (this.Position < this.Length - 16)
+            {
+                _ = this.ReadUInt(); // Offset
+                _ = this.ReadUInt(); // Type
+                _ = this.ReadULong(); // Offset2
+            }
+
+            if (true)
+            {
+
+            }
+
         }
     }
 }

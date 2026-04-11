@@ -6,16 +6,106 @@
              xmlns:local="clr-namespace:FifaAttribDbAppPlugin.WPF"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+
+        <!-- Float -->
+        <DataTemplate x:Key="BoolTemplate">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="300" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Text="{Binding Name}" Grid.Column="0"  TextTrimming="WordEllipsis" ToolTip="{Binding Name}" />
+                <CheckBox IsChecked="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+               Grid.Column="1" />
+            </Grid>
+        </DataTemplate>
+
+        <!-- Float -->
+        <DataTemplate x:Key="FloatFieldTemplate">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="300" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Text="{Binding Name}" Grid.Column="0"  TextTrimming="WordEllipsis" ToolTip="{Binding Name}" />
+                <TextBox Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                     Grid.Column="1" />
+            </Grid>
+        </DataTemplate>
+
+        <!-- Int32 -->
+        <DataTemplate x:Key="Int32FieldTemplate">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="300" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Text="{Binding Name}" Grid.Column="0"  TextTrimming="WordEllipsis" ToolTip="{Binding Name}" />
+                <TextBox Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+             Grid.Column="1" />
+            </Grid>
+        </DataTemplate>
+
+        <!-- Array -->
+        <DataTemplate x:Key="ArrayFieldTemplate">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="300" MaxWidth="300" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Text="{Binding Name}" Grid.Column="0" TextTrimming="WordEllipsis" ToolTip="{Binding Name}" />
+                <TextBlock Text="Arrays Currently Not Supported!" Grid.Column="1" />
+                <!--<ItemsControl ItemsSource="{Binding Value}" Grid.Column="1">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <TextBox Text="{Binding ., Mode=TwoWay}" />
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>-->
+            </Grid>
+        </DataTemplate>
+
+        <!-- Float Curve -->
+        <DataTemplate x:Key="FloatCurveTemplate">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="300" MaxWidth="300" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Text="{Binding Name}" Grid.Column="0" />
+                <TextBlock Text="Float Curves Currently Not Supported!" Grid.Column="1" />
+
+                <!--<ItemsControl ItemsSource="{Binding Value}" Grid.Column="1">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <TextBox Text="{Binding ., Mode=TwoWay}" />
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>-->
+            </Grid>
+        </DataTemplate>
+
+        <local:FieldEditorTemplateSelector x:Key="FieldEditorSelector"
+        FloatTemplate="{StaticResource FloatFieldTemplate}"
+        ArrayTemplate="{StaticResource ArrayFieldTemplate}"
+        FloatCurveTemplate="{StaticResource FloatCurveTemplate}"
+                                           
+                                           />
+    </UserControl.Resources>
     <Grid>
-        <ListView ItemsSource="{Binding Fields}">
-            <ListView.ItemTemplate>
-                <DataTemplate>
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="{Binding Name}" Width="150"/>
-                        <TextBox Text="{Binding Value, Mode=TwoWay}" Width="200"/>
-                    </StackPanel>
-                </DataTemplate>
-            </ListView.ItemTemplate>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30"></RowDefinition>
+            <RowDefinition></RowDefinition>
+        </Grid.RowDefinitions>
+        <TextBlock Background="Orange" Foreground="Black" Text="DOESN'T WORK YET, DO NOT USE!" VerticalAlignment="Center" />
+        <ListView ItemsSource="{Binding Fields}" Grid.Row="1"
+                  ItemTemplateSelector="{StaticResource FieldEditorSelector}">
         </ListView>
     </Grid>
 </UserControl>

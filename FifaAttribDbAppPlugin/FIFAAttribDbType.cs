@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.ComponentModel;
 
 namespace FifaAttribDbAppPlugin
 {
@@ -12,14 +13,23 @@ namespace FifaAttribDbAppPlugin
 
         public ulong FolderHash { get; set; }
 
+        public long DataOffsetInVault { get; set; }
+
+        public byte[] DataInVault { get; set; }
+
+
         public List<FIFAAttribDbField> Fields { get; set; } = new List<FIFAAttribDbField>();
 
-        public FIFAAttribDbType(string name, ulong hash, string folderName, ulong folderHash, List<FIFAAttribDbField> fields)
+        public List<ulong> Hashes { get; set; } = new List<ulong>();
+
+        public FIFAAttribDbType(string name, ulong hash, string folderName, ulong folderHash, long dataOffsetInVault, byte[] dataInVault, List<FIFAAttribDbField> fields)
         {
             Name = name;
             HashLong = hash;
             FolderName = folderName;
             FolderHash = folderHash;
+            DataOffsetInVault = dataOffsetInVault;
+            DataInVault = dataInVault;
             Fields = fields;
         }
 
@@ -29,14 +39,17 @@ namespace FifaAttribDbAppPlugin
         }
     }
 
-    public class EditableTypeViewModel
+    public class EditableTypeViewModel : INotifyPropertyChanged
     {
         public string Name { get; }
         public string FolderName { get; }
         public ulong HashLong { get; }
         public ulong FolderHash { get; }
 
-        public ObservableCollection<EditableFieldViewModel> Fields { get; }
+        public long DataOffsetInVault { get; set; }
+        public long DataSizeInVault { get; set; }
+
+        public ObservableCollection<FIFAAttribDbField> Fields { get; }
 
         public EditableTypeViewModel(FIFAAttribDbType type)
         {
@@ -45,21 +58,10 @@ namespace FifaAttribDbAppPlugin
             HashLong = type.HashLong;
             FolderHash = type.FolderHash;
 
-            Fields = new ObservableCollection<EditableFieldViewModel>(
-                type.Fields.Select(f => new EditableFieldViewModel(f))
-            );
+            Fields = new ObservableCollection<FIFAAttribDbField>(type.Fields.OrderBy(x => x.Name));
         }
 
-        public FIFAAttribDbType ToModel()
-        {
-            return new FIFAAttribDbType(
-                Name,
-                HashLong,
-                FolderName,
-                FolderHash,
-                Fields.Select(f => new FIFAAttribDbField(f.Name, f.ToBytes(), f.Hash, (long)f.FieldType)).ToList()
-            );
-        }
+        public event PropertyChangedEventHandler PropertyChanged;
     }
 
 }
