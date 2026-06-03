@@ -56,7 +56,7 @@ namespace FMT.ServicesManagers.AssetEntryServicing
                 .RevertAsset(entry);
         }
 
-        public bool ModifyAssetEntry(IAssetEntry entry, byte[] data, bool isDataCompressed)
+        public bool ModifyAssetEntry(IAssetEntry entry, byte[] data, bool isDataCompressed, bool raiseNotification = true)
         {
             throw new NotImplementedException();
         }

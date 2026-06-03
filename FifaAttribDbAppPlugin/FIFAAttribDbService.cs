@@ -24,6 +24,9 @@ namespace FifaAttribDbAppPlugin
 
         public FIFAAttribDbAssetEntry GetAssetEntry(string key)
         {
+            if (Assets.Count == 0)
+                return null;
+
             return Assets.First(x => $"{x.AttribDbType.FolderName}/{x.AttribDbType.Name}".Equals(key, StringComparison.OrdinalIgnoreCase));
         }
 
@@ -83,11 +86,14 @@ namespace FifaAttribDbAppPlugin
             var vltVanillaData = SingletonService.GetInstance<IAssetManagementService>().GetAssetData(vltEntry, false);
             var writtenData = await new FIFAAttribDbVLTWriter().WriteToBytes(Assets, vltVanillaData);
 
-#if DEBUG
-            
-#endif
-
+            // Write the modified loose VLT 
             SingletonService.GetInstance<IAssetManagementService>().ModifyCustomAsset("legacy", "data/attribdbgameplay/attribdb.vlt", writtenData);
+
+            // Write the modified VLT into the BIG
+            //var bigEntry = SingletonService.GetInstance<IAssetManagementService>().CustomAssetManagers["legacy"].GetAssetEntry("data/attribdbgameplay/gameplayattribdb.big");
+            //SingletonService.GetInstance<IAssetManagementService>().ModifyCustomAsset("legacy", "data/attribdbgameplay/attribdb.vlt", writtenData);
+
+
         }
 
         public IEnumerable<IAssetEntry> EnumerateAssets(bool modifiedOnly = false)
@@ -124,7 +130,7 @@ namespace FifaAttribDbAppPlugin
             }
         }
 
-        public bool ModifyAssetEntry(IAssetEntry entry, byte[] data, bool isDataCompressed)
+        public bool ModifyAssetEntry(IAssetEntry entry, byte[] data, bool isDataCompressed, bool raiseNotification = true)
         {
             if (entry is FIFAAttribDbAssetEntry dbEntry)
             {

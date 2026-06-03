@@ -17,7 +17,8 @@ namespace FifaAttribDbAppPlugin
         public Dictionary<string, IEnumerable<IAssetEntry>> GetCustomAssetEntriesEnumerations()
         {
             // This only works in FIFA17, so far
-            if (!ProfileManager.IsLoaded(EGame.FIFA17))
+            if (!ProfileManager.IsLoaded(EGame.FIFA17, EGame.FIFA18))
+                //if (!ProfileManager.IsLoaded(EGame.FIFA17))
                 return new Dictionary<string, IEnumerable<IAssetEntry>>();
 
             var ae_attribdbgameplay = assetManagementService.CustomAssetManagers["legacy"].GetAssetEntry("data/attribdbgameplay/attribdb.bin");
@@ -40,7 +41,7 @@ namespace FifaAttribDbAppPlugin
 
             // Assign the types to the Gameplay section
             Dictionary<string, IEnumerable<IAssetEntry>> assetCollections = new();
-            assetCollections.Add("Gameplay", service.EnumerateAssets());
+            assetCollections.Add("Gameplay", service.EnumerateAssets().OrderBy(x=> x.Name));
 
             return assetCollections;
         }
