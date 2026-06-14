@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="FMT.Core" Version="2026.7.6" />
+    <PackageReference Include="FMT.Core" Version="2026.7.9" />
   </ItemGroup>
 
 </Project>
