@@ -10,4 +10,10 @@
     <ProjectReference Include="..\FifaAttribDbAppPlugin\FifaAttribDbAppPlugin.csproj" />
   </ItemGroup>
 
+	<ItemGroup>
+		<PackageReference Include="MaterialDesignThemes" Version="5.3.0" />
+		<PackageReference Include="MaterialDesignThemes.MahApps" Version="5.3.0" />
+		<PackageReference Include="MaterialDesignThemes.Wpf" Version="1.0.1" />
+	</ItemGroup>
+
 </Project>

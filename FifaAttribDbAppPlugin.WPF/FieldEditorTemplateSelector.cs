@@ -20,6 +20,7 @@ namespace FifaAttribDbAppPlugin.WPF
             {
                 FifaAttribDbFieldType.Bool => BoolTemplate,
                 FifaAttribDbFieldType.Int32 => Int32Template,
+                FifaAttribDbFieldType.Int64 => Int32Template,
                 FifaAttribDbFieldType.Float => FloatTemplate,
                 FifaAttribDbFieldType.Array => ArrayTemplate,
                 FifaAttribDbFieldType.FloatCurve => FloatCurveTemplate,

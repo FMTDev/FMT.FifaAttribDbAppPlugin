@@ -1,7 +1,9 @@
 ﻿using FMT.PluginInterfaces.Assets;
 using FMT.ServicesManagers;
 using FMT.ServicesManagers.Interfaces;
+using Newtonsoft.Json;
 using System.ComponentModel;
+using System.Windows.Input;
 
 namespace FifaAttribDbAppPlugin
 {
@@ -51,7 +53,14 @@ namespace FifaAttribDbAppPlugin
 
                     if (SingletonService.Instantiated<IAssetManagementService>())
                     {
-                        SingletonService.GetInstance<IAssetManagementService>().Logger?.Log($"Field Modified: {Name} | Original: {OriginalValue} | Modified: {ModifiedValue}");
+                        if (OriginalValue.GetType().IsArray)
+                        {
+                            SingletonService.GetInstance<IAssetManagementService>().Logger?.Log($"Field Modified: {Name} | Original: {JsonConvert.SerializeObject(OriginalValue)} | Modified: {JsonConvert.SerializeObject(ModifiedValue)}");
+                        }
+                        else
+                        {
+                            SingletonService.GetInstance<IAssetManagementService>().Logger?.Log($"Field Modified: {Name} | Original: {OriginalValue} | Modified: {ModifiedValue}");
+                        }
                         SingletonService.GetInstance<IAssetManagementService>().ModifyEntry(ParentEntry, null);
                     }
                 }
@@ -65,13 +74,42 @@ namespace FifaAttribDbAppPlugin
 
         public FifaAttribDbFieldType FieldType { get; set; }
 
+        private EditableFloatArrayViewModel _arrayViewModel;
+        public EditableFloatArrayViewModel ArrayViewModel
+        {
+            get
+            {
+                if (_arrayViewModel != null) return _arrayViewModel;
+                if (Value is float[] arr)
+                {
+                    _arrayViewModel = new EditableFloatArrayViewModel(arr, this);
+                    return _arrayViewModel;
+                }
+                return null;
+            }
+        }
+
         public long? BinaryFileOffset { get; set; }
+
+        public int? BinaryFileSize { get; set; }
 
         public long VaultValueOffset { get; set; }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public FIFAAttribDbField(string name, object value, ulong hash, long fieldType, long vaultValueOffset, long? binaryFileOffset = null)
+        public ICommand RevertValueCommand { get; set; } = new RelayCommand((x) =>
+        {
+        });
+
+        public FIFAAttribDbField()
+        {
+            RevertValueCommand = new RelayCommand((x) =>
+            {
+                Value = null;
+            });
+        }
+
+        public FIFAAttribDbField(string name, object value, ulong hash, long fieldType, long vaultValueOffset, long? binaryFileOffset = null) : this()
         {
             Name = name;
             Hash = hash;
@@ -80,6 +118,7 @@ namespace FifaAttribDbAppPlugin
             BinaryFileOffset = binaryFileOffset;
 
             Value = value;
+
 
         }
 

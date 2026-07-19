@@ -1,31 +1,76 @@
 ﻿using FMT.FileTools;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace FifaAttribDbAppPlugin.AttribDbGameplay
 {
     /// <summary>
-    /// This class reads the AttribDb/AttribDb.BIN files used in FIFA games. It will obtain the String Names of the Types.
-    /// 
+    /// Reads the AttribDbGameplay.BIN file. Stores the raw binary data
+    /// so callers can read/write FloatCurve, Array, and other non-scalar field data.
     /// </summary>
     public class FIFAAttribDbGameplayBinaryReader : NativeReader
     {
+        public byte[] RawData { get; }
+
+        public const int HeaderSize = 32;
+
         public FIFAAttribDbGameplayBinaryReader(string filePath) : base(filePath)
         {
+            RawData = ReadBytes((int)BaseStream.Length);
         }
 
-        public FIFAAttribDbGameplayBinaryReader(
-            byte[] attribdbbindata
-            ) : base(attribdbbindata)
+        public FIFAAttribDbGameplayBinaryReader(byte[] data) : base(data)
         {
-            this.Position = 0;
-
-            this.ReadBytes(32); // Skip header
-          
+            Position = 0;
+            ReadBytes(HeaderSize);
+            RawData = data;
         }
 
+        public float[] ReadFloatCurve(long offset, int floatCount)
+        {
+            if (offset < 0 || offset + floatCount * 4 > RawData.Length)
+                return Array.Empty<float>();
+
+            var values = new float[floatCount];
+            for (int i = 0; i < floatCount; i++)
+                values[i] = BitConverter.ToSingle(RawData, (int)offset + i * 4);
+            return values;
+        }
+
+        public float[] ReadArray(long offset)
+        {
+            if (offset < 0 || offset + 8 > RawData.Length)
+                return Array.Empty<float>();
+
+            var count = BitConverter.ToUInt16(RawData, (int)offset);
+            if (count == 0 || offset + 8 + count * 4 > RawData.Length)
+                return Array.Empty<float>();
+
+            var values = new float[count];
+            for (int i = 0; i < count; i++)
+                values[i] = BitConverter.ToSingle(RawData, (int)offset + 8 + i * 4);
+            return values;
+        }
+
+        public void WriteFloatCurve(long offset, float[] values)
+        {
+            if (offset < 0 || values == null || offset + values.Length * 4 > RawData.Length)
+                return;
+
+            for (int i = 0; i < values.Length; i++)
+                BitConverter.GetBytes(values[i]).CopyTo(RawData, (int)offset + i * 4);
+        }
+
+        public void WriteArray(long offset, float[] values)
+        {
+            if (offset < 0 || values == null || offset + 8 + values.Length * 4 > RawData.Length)
+                return;
+
+            BitConverter.GetBytes((ushort)values.Length).CopyTo(RawData, (int)offset);
+            BitConverter.GetBytes((ushort)values.Length).CopyTo(RawData, (int)offset + 2);
+            BitConverter.GetBytes((uint)4).CopyTo(RawData, (int)offset + 4);
+            for (int i = 0; i < values.Length; i++)
+                BitConverter.GetBytes(values[i]).CopyTo(RawData, (int)offset + 8 + i * 4);
+        }
+
+        public byte[] GetRawData() => RawData;
     }
 }

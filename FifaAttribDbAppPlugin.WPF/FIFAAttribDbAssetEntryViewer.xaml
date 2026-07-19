@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:MaterialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:local="clr-namespace:FifaAttribDbAppPlugin.WPF"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
@@ -27,12 +28,19 @@
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="300" />
+                    <ColumnDefinition Width="30" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
                 <TextBlock Text="{Binding Name}" Grid.Column="0"  TextTrimming="WordEllipsis" ToolTip="{Binding Name}" />
-                <TextBox Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                     Grid.Column="1" />
+
+                <Button Command="{Binding RevertValueCommand}" Click="btnRevert_Click" Grid.Column="1" x:Name="btnRevert" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" ToolTip="Revert">
+                    <StackPanel>
+                        <MaterialDesign:PackIcon Kind="FileRevert" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+                <TextBox Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" ToolTip="{Binding OriginalValue}"
+                     Grid.Column="2" />
             </Grid>
         </DataTemplate>
 
@@ -45,7 +53,7 @@
                 </Grid.ColumnDefinitions>
 
                 <TextBlock Text="{Binding Name}" Grid.Column="0"  TextTrimming="WordEllipsis" ToolTip="{Binding Name}" />
-                <TextBox Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                <TextBox Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
              Grid.Column="1" />
             </Grid>
         </DataTemplate>
@@ -58,15 +66,20 @@
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
-                <TextBlock Text="{Binding Name}" Grid.Column="0" TextTrimming="WordEllipsis" ToolTip="{Binding Name}" />
-                <TextBlock Text="Arrays Currently Not Supported!" Grid.Column="1" />
-                <!--<ItemsControl ItemsSource="{Binding Value}" Grid.Column="1">
+                <TextBlock Text="{Binding Name}" Grid.Column="0" TextTrimming="WordEllipsis" ToolTip="{Binding Name}" VerticalAlignment="Top" Margin="0,2,0,0" />
+                <ItemsControl ItemsSource="{Binding ArrayViewModel.Items}" Grid.Column="1">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <TextBox Text="{Binding ., Mode=TwoWay}" />
+                            <TextBox Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                                     Width="80" Margin="2" VerticalContentAlignment="Center" />
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
-                </ItemsControl>-->
+                </ItemsControl>
             </Grid>
         </DataTemplate>
 
@@ -78,33 +91,36 @@
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
-                <TextBlock Text="{Binding Name}" Grid.Column="0" />
-                <TextBlock Text="Float Curves Currently Not Supported!" Grid.Column="1" />
-
-                <!--<ItemsControl ItemsSource="{Binding Value}" Grid.Column="1">
+                <TextBlock Text="{Binding Name}" Grid.Column="0" TextTrimming="WordEllipsis" ToolTip="{Binding Name}" VerticalAlignment="Top" Margin="0,2,0,0" />
+                <ItemsControl ItemsSource="{Binding ArrayViewModel.Items}" Grid.Column="1">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <TextBox Text="{Binding ., Mode=TwoWay}" />
+                            <TextBox Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                                     Width="80" Margin="2" VerticalContentAlignment="Center" />
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
-                </ItemsControl>-->
+                </ItemsControl>
             </Grid>
         </DataTemplate>
 
         <local:FieldEditorTemplateSelector x:Key="FieldEditorSelector"
+        BoolTemplate="{StaticResource BoolTemplate}"
+        Int32Template="{StaticResource Int32FieldTemplate}"
         FloatTemplate="{StaticResource FloatFieldTemplate}"
         ArrayTemplate="{StaticResource ArrayFieldTemplate}"
         FloatCurveTemplate="{StaticResource FloatCurveTemplate}"
-                                           
-                                           />
+                                            />
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="30"></RowDefinition>
             <RowDefinition></RowDefinition>
         </Grid.RowDefinitions>
-        <TextBlock Background="Orange" Foreground="Black" Text="DOESN'T WORK YET, DO NOT USE!" VerticalAlignment="Center" />
-        <ListView ItemsSource="{Binding Fields}" Grid.Row="1"
+        <ListView ItemsSource="{Binding Fields}" Grid.Row="0"
                   ItemTemplateSelector="{StaticResource FieldEditorSelector}">
         </ListView>
     </Grid>

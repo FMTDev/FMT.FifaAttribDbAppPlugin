@@ -15,7 +15,7 @@ namespace FifaAttribDbAppPlugin.AttribDb
         public async Task<byte[]> WriteToBytes(List<FIFAAttribDbAssetEntry> assets)
         {
             var ae_attribdbgameplayvlt = assetManagementService.CustomAssetManagers["legacy"].GetAssetEntry("data/attribdbgameplay/attribdb.vlt");
-            assetManagementService.RevertAsset(ae_attribdbgameplayvlt);
+            //assetManagementService.RevertAsset(ae_attribdbgameplayvlt);
 
             var ms = await Task.Run(() =>
             {

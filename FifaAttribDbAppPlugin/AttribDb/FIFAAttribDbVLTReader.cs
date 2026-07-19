@@ -145,6 +145,13 @@ namespace FifaAttribDbAppPlugin.AttribDb
                                 case FifaAttribDbFieldType.Int64:
                                     fieldValueObj = BitConverter.ToInt64(new ReadOnlySpan<byte>(fieldValue));
                                     break;
+                                case FifaAttribDbFieldType.Bool:
+                                    fieldValueObj = fieldValue[0] != 0;
+                                    break;
+                                case FifaAttribDbFieldType.String:
+                                case FifaAttribDbFieldType.RawBytes:
+                                    fieldValueObj = BitConverter.ToInt32(new ReadOnlySpan<byte>(fieldValue));
+                                    break;
                                 case FifaAttribDbFieldType.Array:
                                     break;
                                 case FifaAttribDbFieldType.FloatCurve:
@@ -202,26 +209,41 @@ namespace FifaAttribDbAppPlugin.AttribDb
                 }
 
                 this.Pad(16);
-                this.ReadUInt(); // NrtP
 
-                _ = this.Position;
-                //var sizeOfArrayData = this.ReadInt();
-                //for (var i =0; i < sizeOfArrayData; i++)
-                //{
-                //    _ = this.ReadUInt(); // Offset
-                //    _ = this.ReadUInt(); // Type
-                //    _ = this.ReadULong(); // Offset2
-                //}
-                //while (this.Position < this.Length - 16)
-                //{
-                //    _ = this.ReadUInt(); // Offset
-                //    _ = this.ReadUInt(); // Type
-                //    _ = this.ReadULong(); // Offset2
-                //}
+                var nrtPData = ParseNrtPPointers(this);
 
-                if (true)
+                foreach (var dbType in ListOfDbTypes)
                 {
+                    foreach (var field in dbType.Fields)
+                    {
+                        if (nrtPData.TryGetValue((uint)field.VaultValueOffset, out uint binDest))
+                        {
+                            field.BinaryFileOffset = binDest;
+                        }
+                    }
+                }
 
+                var nonScalarFieldTypes = new HashSet<ulong>
+                {
+                    (ulong)FifaAttribDbFieldType.FloatCurve,
+                    (ulong)FifaAttribDbFieldType.FloatCurve2,
+                    (ulong)FifaAttribDbFieldType.Array
+                };
+
+                var allNonScalarFields = new List<FIFAAttribDbField>();
+                foreach (var dbType in ListOfDbTypes)
+                {
+                    foreach (var f in dbType.Fields)
+                    {
+                        if (nonScalarFieldTypes.Contains((ulong)f.FieldType) && f.BinaryFileOffset.HasValue)
+                            allNonScalarFields.Add(f);
+                    }
+                }
+                allNonScalarFields.Sort((a, b) => a.BinaryFileOffset.Value.CompareTo(b.BinaryFileOffset.Value));
+
+                for (int i = 0; i < allNonScalarFields.Count - 1; i++)
+                {
+                    allNonScalarFields[i].BinaryFileSize = (int)(allNonScalarFields[i + 1].BinaryFileOffset.Value - allNonScalarFields[i].BinaryFileOffset.Value);
                 }
             }
             catch
@@ -229,6 +251,63 @@ namespace FifaAttribDbAppPlugin.AttribDb
 
             }
 
+        }
+        private static Dictionary<uint, uint> ParseNrtPPointers(FIFAAttribDbVLTReader reader)
+        {
+            var result = new Dictionary<uint, uint>();
+
+            var nrtPMarker = Encoding.ASCII.GetBytes("NrtP");
+            int nrtPPos = -1;
+            var vltData = reader.BaseStream is MemoryStream ms ? ms.ToArray() : null;
+            if (vltData == null)
+                return result;
+
+            for (int i = 0; i < vltData.Length - 4; i++)
+            {
+                if (vltData[i] == nrtPMarker[0] && vltData[i + 1] == nrtPMarker[1] &&
+                    vltData[i + 2] == nrtPMarker[2] && vltData[i + 3] == nrtPMarker[3])
+                { nrtPPos = i; break; }
+            }
+
+            if (nrtPPos < 0)
+                return result;
+
+            reader.Position = nrtPPos + 4;
+            var chunkSizeField = reader.ReadUInt();
+            long chunkEnd = nrtPPos + 4 + chunkSizeField;
+
+            const ushort PtrEnd = 0;
+            const ushort PtrNull = 1;
+            const ushort PtrSetFixupTarget = 2;
+            const ushort PtrDepRelative = 3;
+
+            bool isVltPointer = false;
+
+            while (reader.Position + 16 <= chunkEnd)
+            {
+                uint fixupOffset = reader.ReadUInt();
+                ushort ptrType = reader.ReadUShort();
+                ushort index = reader.ReadUShort();
+                uint destination = reader.ReadUInt();
+                uint trailing = reader.ReadUInt();
+
+                switch (ptrType)
+                {
+                    case PtrSetFixupTarget:
+                        isVltPointer = index == 0;
+                        break;
+                    case PtrDepRelative:
+                    case PtrNull:
+                        if (isVltPointer)
+                            result[fixupOffset] = destination;
+                        break;
+                    case PtrEnd:
+                        break;
+                }
+                if (ptrType == PtrEnd) break;
+            }
+
+            return result;
         }
     }
 }

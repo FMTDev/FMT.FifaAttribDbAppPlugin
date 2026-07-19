@@ -16,6 +16,14 @@ namespace FifaAttribDbAppPlugin.WPF
         {
             InitializeComponent();
             DataContext = new EditableTypeViewModel(entry.AttribDbType);
+
+        }
+
+        private void btnRevert_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            var button = sender as Button;
+            if (button.Command != null && button.Command is RelayCommand relayCommand)
+                relayCommand.RaiseCanExecuteChanged();
         }
     }
 }

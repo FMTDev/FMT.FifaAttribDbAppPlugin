@@ -1,4 +1,4 @@
-﻿using FMT.PluginInterfaces;
+using FMT.PluginInterfaces;
 using FMT.PluginInterfaces.Assets;
 using FMT.ProfileSystem;
 using FMT.ServicesManagers;
@@ -21,16 +21,69 @@ namespace FifaAttribDbAppPlugin
                 //if (!ProfileManager.IsLoaded(EGame.FIFA17))
                 return new Dictionary<string, IEnumerable<IAssetEntry>>();
 
+            var service = new FIFAAttribDbService();
+
+            byte[] GetAssetBytes(IAssetEntry entry)
+            {
+                using (var stream = assetManagementService.CustomAssetManagers["legacy"].GetAsset(entry))
+                {
+                    if (stream is MemoryStream ms)
+                    {
+                        return ms.ToArray();
+                    }
+                    using (var tempMs = new MemoryStream())
+                    {
+                        stream.CopyTo(tempMs);
+                        return tempMs.ToArray();
+                    }
+                }
+            }
+
             var ae_attribdbgameplay = assetManagementService.CustomAssetManagers["legacy"].GetAssetEntry("data/attribdbgameplay/attribdb.bin");
             var ae_attribdbgameplayvlt = assetManagementService.CustomAssetManagers["legacy"].GetAssetEntry("data/attribdbgameplay/attribdb.vlt");
 
-            // Ensure the assets are not modified
-            assetManagementService.RevertAsset(ae_attribdbgameplay);
-            assetManagementService.RevertAsset(ae_attribdbgameplayvlt);
+            if (ae_attribdbgameplay != null && ae_attribdbgameplayvlt != null)
+            {
+                assetManagementService.RevertAsset(ae_attribdbgameplay);
+                assetManagementService.RevertAsset(ae_attribdbgameplayvlt);
+                service.Load(
+                    "data/attribdbgameplay/attribdb.vlt",
+                    "data/attribdbgameplay/attribdb.bin",
+                    GetAssetBytes(ae_attribdbgameplayvlt),
+                    GetAssetBytes(ae_attribdbgameplay)
+                );
+            }
 
-            // TODO: This should not be registered here, but rather in the AppPlugin initialization
-            var service = new FIFAAttribDbService();
-            service.Load(((MemoryStream)assetManagementService.CustomAssetManagers["legacy"].GetAsset(ae_attribdbgameplayvlt)).ToArray(), ((MemoryStream)assetManagementService.CustomAssetManagers["legacy"].GetAsset(ae_attribdbgameplay)).ToArray());
+            //var ae_attribdb = assetManagementService.CustomAssetManagers["legacy"].GetAssetEntry("data/attribdb/attribdb.bin");
+            //var ae_attribdbvlt = assetManagementService.CustomAssetManagers["legacy"].GetAssetEntry("data/attribdb/attribdb.vlt");
+
+            //if (ae_attribdb != null && ae_attribdbvlt != null)
+            //{
+            //    assetManagementService.RevertAsset(ae_attribdb);
+            //    assetManagementService.RevertAsset(ae_attribdbvlt);
+            //    service.Load(
+            //        "data/attribdb/attribdb.vlt",
+            //        "data/attribdb/attribdb.bin",
+            //        GetAssetBytes(ae_attribdbvlt),
+            //        GetAssetBytes(ae_attribdb)
+            //    );
+            //}
+
+            //var ae_attribdb_inbig = assetManagementService.CustomAssetManagers["legacy"].GetAssetEntry("data/attribdb/attribdb.bin");
+            //var ae_attribdbvlt_inbig = assetManagementService.CustomAssetManagers["legacy"].GetAssetEntry("data/attribdb/attribdb.vlt");
+
+            //if (ae_attribdb_inbig != null && ae_attribdbvlt_inbig != null)
+            //{
+            //    assetManagementService.RevertAsset(ae_attribdb);
+            //    assetManagementService.RevertAsset(ae_attribdbvlt);
+            //    service.Load(
+            //        "data/attribdb/attribdb.vlt",
+            //        "data/attribdb/attribdb.bin",
+            //        GetAssetBytes(ae_attribdbvlt),
+            //        GetAssetBytes(ae_attribdb)
+            //    );
+            //}
+
             if (SingletonService.Instantiated<FIFAAttribDbService>())
             {
                 var existingService = SingletonService.GetInstance<IFIFAAttribDbService>();
@@ -41,7 +94,7 @@ namespace FifaAttribDbAppPlugin
 
             // Assign the types to the Gameplay section
             Dictionary<string, IEnumerable<IAssetEntry>> assetCollections = new();
-            assetCollections.Add("Gameplay", service.EnumerateAssets().OrderBy(x=> x.Name));
+            assetCollections.Add("Gameplay", service.EnumerateAssets().OrderBy(x => x.Name));
 
             return assetCollections;
         }

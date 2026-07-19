@@ -67,6 +67,11 @@ namespace FifaAttribDbAppPluginTests
             return EBX.Values;
         }
 
+        public IEnumerable<EbxAssetEntry> EnumerateEbx(string[] types, bool modifiedOnly = false, bool includeLinked = false, bool includeHidden = true, string bundleSubPath = "")
+        {
+            return EBX.Values;
+        }
+
         public IEnumerable<ResAssetEntry> EnumerateRes(uint resType = 0, bool modifiedOnly = false, string bundleSubPath = "")
         {
             return RES.Values;
@@ -132,6 +137,11 @@ namespace FifaAttribDbAppPluginTests
             throw new NotImplementedException();
         }
 
+        public ResAssetEntry GetResEntry(ulong name)
+        {
+            throw new NotImplementedException();
+        }
+
         public MemoryStream GetResourceData(string superBundleName, long offset, long size, IAssetEntry entry = null)
         {
             throw new NotImplementedException();
@@ -162,7 +172,7 @@ namespace FifaAttribDbAppPluginTests
             throw new NotImplementedException();
         }
 
-        public bool ModifyChunk(ChunkAssetEntry chunkAssetEntry, byte[] buffer, CompressionType compressionOverride = CompressionType.Default, bool addToChunkBundle = false)
+        public bool ModifyChunk(ChunkAssetEntry chunkAssetEntry, byte[] buffer, CompressionType compressionOverride = CompressionType.Default, bool addToChunkBundle = false, bool a5 = false)
         {
             throw new NotImplementedException();
         }
@@ -177,7 +187,17 @@ namespace FifaAttribDbAppPluginTests
             throw new NotImplementedException();
         }
 
+        public void ModifyEbx(string name, EbxAsset asset, bool a3)
+        {
+            throw new NotImplementedException();
+        }
+
         public void ModifyRes(ResAssetEntry assetEntry, byte[] buffer, byte[] meta = null)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void ModifyRes(ResAssetEntry assetEntry, byte[] buffer, byte[] meta, bool a4)
         {
             throw new NotImplementedException();
         }
@@ -214,6 +234,11 @@ namespace FifaAttribDbAppPluginTests
                 }
             }
             return false;
+        }
+
+        public bool ModifyEntry(IAssetEntry entry, byte[] d2, bool a3)
+        {
+            return ModifyEntry(entry, d2);
         }
 
         public BundleEntry GetBundleEntry(int bundleId)

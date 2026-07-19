@@ -1,4 +1,4 @@
-﻿using FMT.FileTools;
+using FMT.FileTools;
 using FMT.Hash;
 using FMT.Models.Assets.AssetEntry.Entries;
 using FMT.PluginInterfaces;
@@ -57,7 +57,10 @@ namespace FifaAttribDbAppPlugin
             {
                 return HasModifiedData ? new ModifiedAssetEntry() : null;
             }
-            set => throw new NotImplementedException();
+            set
+            {
+
+            }
         }
 
 
@@ -82,8 +85,19 @@ namespace FifaAttribDbAppPlugin
             return AttribDbType.Name;
         }
 
+        public string VltPath { get; set; }
+        public string BinPath { get; set; }
+
         public string GetPath()
         {
+            if (!string.IsNullOrEmpty(VltPath))
+            {
+                var parts = VltPath.Split('/');
+                if (parts.Length > 2)
+                {
+                    return $"{parts[parts.Length - 2]}/{AttribDbType.FolderName}";
+                }
+            }
             return $"{AttribDbType.FolderName}";
         }
 
@@ -112,28 +126,53 @@ namespace FifaAttribDbAppPlugin
             {
                 foreach (var f in AttribDbType.Fields)
                 {
-#if DEBUG
-                    if (f.Name == "ATTR_DribbleJogSpeed")
-                    {
+                    if (f.ModifiedValue == null) continue;
 
-                    }
-#endif
+                    var vltOffset = f.VaultValueOffset - AttribDbType.DataOffsetInVault;
+                    //if (vltOffset < 0 || vltOffset + 8 > vanillaDataCloned.Length) continue;
+
                     switch (f.FieldType)
                     {
-                        case FifaAttribDbFieldType.Bool:
-                            break;
                         case FifaAttribDbFieldType.Float:
-                            if (float.TryParse(f.Value.ToString(), out var fl))
+                            if (f.Value is float fv || (f.Value is string fs && float.TryParse(fs, out fv)))
                             {
-                                nw.Position = f.VaultValueOffset - AttribDbType.DataOffsetInVault;
-                                nw.Write(fl);
+                                nw.Position = vltOffset;
+                                nw.Write(fv);
+                            }
+                            break;
+                        case FifaAttribDbFieldType.Int32:
+                            if (f.Value is int iv)
+                            {
+                                nw.Position = vltOffset;
+                                nw.Write(iv);
+                            }
+                            break;
+                        case FifaAttribDbFieldType.Int64:
+                            if (f.Value is long lv)
+                            {
+                                nw.Position = vltOffset;
+                                nw.Write(lv);
+                            }
+                            break;
+                        case FifaAttribDbFieldType.Bool:
+                            if (f.Value is bool bv)
+                            {
+                                nw.Position = vltOffset;
+                                nw.Write(bv ? (byte)1 : (byte)0);
+                            }
+                            break;
+                        case FifaAttribDbFieldType.String:
+                        case FifaAttribDbFieldType.RawBytes:
+                            if (f.Value is int sv)
+                            {
+                                nw.Position = vltOffset;
+                                nw.Write(sv);
                             }
                             break;
                     }
                 }
                 return ((MemoryStream)nw.BaseStream).ToArray();
             }
-
         }
     }
 }
