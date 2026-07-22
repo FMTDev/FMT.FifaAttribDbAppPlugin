@@ -3,10 +3,11 @@ using FMT.Hash;
 using FMT.Models.Assets.AssetEntry.Entries;
 using FMT.PluginInterfaces;
 using FMT.PluginInterfaces.Assets;
+using System.ComponentModel;
 
 namespace FifaAttribDbAppPlugin
 {
-    public class FIFAAttribDbAssetEntry : IAssetEntry
+    public class FIFAAttribDbAssetEntry : IAssetEntry, INotifyPropertyChanged
     {
         public string Name { get; set; }
 
@@ -75,6 +76,8 @@ namespace FifaAttribDbAppPlugin
             }
         }
 
+        public event PropertyChangedEventHandler PropertyChanged;
+
         public string GetDisplayName()
         {
             return AttribDbType.Name;
@@ -130,6 +133,14 @@ namespace FifaAttribDbAppPlugin
 
                     var vltOffset = f.VaultValueOffset - AttribDbType.DataOffsetInVault;
                     //if (vltOffset < 0 || vltOffset + 8 > vanillaDataCloned.Length) continue;
+
+#if DEBUG
+                    var vltOffsetInFile = f.VaultValueOffset;
+                    if (vltOffsetInFile == 11104)
+                    {
+
+                    }
+#endif
 
                     switch (f.FieldType)
                     {

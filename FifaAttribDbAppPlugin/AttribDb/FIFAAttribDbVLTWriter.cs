@@ -34,11 +34,18 @@ namespace FifaAttribDbAppPlugin.AttribDb
                 nw.Position = 0;
                 foreach (var asset in assets)
                 {
+#if DEBUG
+                    if (asset.IsModified)
+                    {
+
+                    }
+#endif
                     nw.Position = asset.AttribDbType.DataOffsetInVault;
                     nw.Write(asset.GetData());
                 }
 
-                return ((MemoryStream)nw.BaseStream).ToArray();
+                var result = ((MemoryStream)nw.BaseStream).ToArray();
+                return result;
             }
 
         }

@@ -9,6 +9,8 @@
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
 
+        <local:ObjectToTextConverter x:Key="ObjectToTextConverter" />
+
         <!-- Float -->
         <DataTemplate x:Key="BoolTemplate">
             <Grid>
@@ -17,7 +19,7 @@
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
-                <TextBlock Text="{Binding Name}" Grid.Column="0"  TextTrimming="WordEllipsis" ToolTip="{Binding Name}" />
+                <TextBlock Text="{Binding Name}" Grid.Column="0" VerticalAlignment="Center"  TextTrimming="WordEllipsis" ToolTip="{Binding Name}" />
                 <CheckBox IsChecked="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                Grid.Column="1" />
             </Grid>
@@ -28,19 +30,25 @@
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="300" />
-                    <ColumnDefinition Width="30" />
-                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="50" />
+                    <ColumnDefinition Width="300" />
                 </Grid.ColumnDefinitions>
 
-                <TextBlock Text="{Binding Name}" Grid.Column="0"  TextTrimming="WordEllipsis" ToolTip="{Binding Name}" />
+                <TextBlock Text="{Binding Name}" Grid.Column="0" VerticalAlignment="Center"  TextTrimming="WordEllipsis" ToolTip="{Binding Name}" />
 
                 <Button Command="{Binding RevertValueCommand}" Click="btnRevert_Click" Grid.Column="1" x:Name="btnRevert" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" ToolTip="Revert">
                     <StackPanel>
                         <MaterialDesign:PackIcon Kind="FileRevert" VerticalAlignment="Center" />
                     </StackPanel>
                 </Button>
-                <TextBox Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" ToolTip="{Binding OriginalValue}"
-                     Grid.Column="2" />
+                <Grid Grid.Column="2" Margin="3,0,0,0">
+                    <TextBox x:Name="floatTextBox" Text="{Binding ValueString, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" ToolTip="{Binding OriginalValue}" />
+                    <TextBlock Text="{Binding OriginalValue, Converter={StaticResource ObjectToTextConverter}}"
+                               Foreground="Gray" FontStyle="Italic" Opacity="0.4"
+                               VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,5,0"
+                               >
+                    </TextBlock>
+                </Grid>
             </Grid>
         </DataTemplate>
 
@@ -52,8 +60,8 @@
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
-                <TextBlock Text="{Binding Name}" Grid.Column="0"  TextTrimming="WordEllipsis" ToolTip="{Binding Name}" />
-                <TextBox Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                <TextBlock Text="{Binding Name}" Grid.Column="0" VerticalAlignment="Center" TextTrimming="WordEllipsis" ToolTip="{Binding Name}" />
+                <TextBox Text="{Binding ValueString, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
              Grid.Column="1" />
             </Grid>
         </DataTemplate>
@@ -61,22 +69,25 @@
         <!-- Array -->
         <DataTemplate x:Key="ArrayFieldTemplate">
             <Grid>
+                <Grid.Resources>
+                    <ResourceDictionary Source="pack://application:,,,/PresentationFramework.Fluent;component/Themes/Fluent.Dark.xaml" />
+                </Grid.Resources>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="300" MaxWidth="300" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
-                <TextBlock Text="{Binding Name}" Grid.Column="0" TextTrimming="WordEllipsis" ToolTip="{Binding Name}" VerticalAlignment="Top" Margin="0,2,0,0" />
+                <TextBlock Text="{Binding Name}" Grid.Column="0" TextTrimming="WordEllipsis" ToolTip="{Binding Name}" VerticalAlignment="Center" Margin="0,2,0,0" />
                 <ItemsControl ItemsSource="{Binding ArrayViewModel.Items}" Grid.Column="1">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
-                            <WrapPanel />
+                            <WrapPanel  HorizontalAlignment="Stretch"  />
                         </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <TextBox Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
-                                     Width="80" Margin="2" VerticalContentAlignment="Center" />
+                     Width="80" Margin="2" VerticalContentAlignment="Stretch" HorizontalAlignment="Stretch" />
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
@@ -91,17 +102,17 @@
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
-                <TextBlock Text="{Binding Name}" Grid.Column="0" TextTrimming="WordEllipsis" ToolTip="{Binding Name}" VerticalAlignment="Top" Margin="0,2,0,0" />
+                <TextBlock Text="{Binding Name}" Grid.Column="0" TextTrimming="WordEllipsis" ToolTip="{Binding Name}" VerticalAlignment="Center" Margin="0,2,0,0" />
                 <ItemsControl ItemsSource="{Binding ArrayViewModel.Items}" Grid.Column="1">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
-                            <WrapPanel />
+                            <WrapPanel HorizontalAlignment="Stretch" />
                         </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <TextBox Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
-                                     Width="80" Margin="2" VerticalContentAlignment="Center" />
+                                     Width="80" Margin="2" VerticalContentAlignment="Center" HorizontalAlignment="Stretch"  />
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
@@ -117,10 +128,15 @@
                                             />
     </UserControl.Resources>
     <Grid>
+        <Grid.Resources>
+            <ResourceDictionary Source="pack://application:,,,/PresentationFramework.Fluent;component/Themes/Fluent.Dark.xaml" />
+        </Grid.Resources>
         <Grid.RowDefinitions>
+            <RowDefinition Height="20"></RowDefinition>
             <RowDefinition></RowDefinition>
         </Grid.RowDefinitions>
-        <ListView ItemsSource="{Binding Fields}" Grid.Row="0"
+        <TextBlock Background="Orange" Padding="5,0,0,0" FontWeight="Bold" Foreground="Black" Text="Warning: This is in early development and may have missing data or crash the game"></TextBlock>
+        <ListView ItemsSource="{Binding Fields}" Grid.Row="1"
                   ItemTemplateSelector="{StaticResource FieldEditorSelector}">
         </ListView>
     </Grid>

@@ -31,17 +31,48 @@ namespace FifaAttribDbAppPlugin
         {
             get
             {
-                // Return ModifiedValue if it exists, otherwise return OriginalValue
                 if (ModifiedValue != null)
+                {
+                    if (string.IsNullOrEmpty(ModifiedValue.ToString()))
+                    {
+                        ModifiedValue = null;
+                        return OriginalValue;
+                    }
+
+                    if (ModifiedValue.ToString() == "System.Object")
+                    {
+                        ModifiedValue = null;
+                        return OriginalValue;
+                    }
+
                     return ModifiedValue;
+                }
+
+                switch (FieldType)
+                {
+                    case FifaAttribDbFieldType.Float:
+                        if (OriginalValue is float fv)
+                        {
+                            return fv;
+                        }
+                        if (OriginalValue is string fs && float.TryParse(fs, out fv))
+                        {
+                            return fv;
+                        }
+                        break;
+                }
 
                 return OriginalValue;
             }
 
             set
             {
+                if (FieldType == FifaAttribDbFieldType.Float && value is string strVal)
+                {
+                    if (float.TryParse(strVal, out float parsed))
+                        value = parsed;
+                }
 
-                // Set OriginalValue if it's null, otherwise set ModifiedValue
                 if (OriginalValue == null)
                 {
                     OriginalValue = value;
@@ -50,6 +81,10 @@ namespace FifaAttribDbAppPlugin
                 {
                     ModifiedValue = value;
                     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value)));
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ValueString)));
+
+                    if (ParentEntry as INotifyPropertyChanged != null)
+                        PropertyChanged?.Invoke((ParentEntry as INotifyPropertyChanged), new PropertyChangedEventArgs("IsModified"));
 
                     if (SingletonService.Instantiated<IAssetManagementService>())
                     {
@@ -94,6 +129,25 @@ namespace FifaAttribDbAppPlugin
         public int? BinaryFileSize { get; set; }
 
         public long VaultValueOffset { get; set; }
+
+        public string ValueString
+        {
+            get
+            {
+                var val = Value;
+                var result = val?.ToString() ?? string.Empty;
+                System.Diagnostics.Debug.WriteLine($"[ValueString.get] Name={Name} Value={val} ({val?.GetType()}) Result=\"{result}\"");
+                return result;
+            }
+            set
+            {
+                if (value == Value?.ToString()) return;
+                if (FieldType == FifaAttribDbFieldType.Float && float.TryParse(value, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float f))
+                    Value = f;
+                else
+                    Value = value;
+            }
+        }
 
         public event PropertyChangedEventHandler PropertyChanged;
 

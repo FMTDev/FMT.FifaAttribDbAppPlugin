@@ -2,8 +2,10 @@ using FifaAttribDbAppPlugin.AttribDb;
 using FifaAttribDbAppPlugin.AttribDbGameplay;
 using FMT.FileTools;
 using FMT.Hash;
+using FMT.Logging;
 using FMT.Models.Assets.AssetEntry.Entries;
 using FMT.PluginInterfaces.Assets;
+using FMT.ProfileSystem;
 using FMT.ServicesManagers;
 using FMT.ServicesManagers.AssetEntryServicing;
 using FMT.ServicesManagers.Interfaces;
@@ -194,6 +196,27 @@ namespace FifaAttribDbAppPlugin
 
             var groups = Assets.GroupBy(x => x.VltPath).ToList();
 
+            // Check for assets that are marked "modified" but actually aren't and revert them
+            foreach (var group in groups)
+            {
+                foreach (var asset in group)
+                {
+                    var isModifiedByField = false;
+                    foreach(var f in asset.AttribDbType.Fields)
+                    {
+                        if (f.ModifiedValue != null)
+                        {
+                            isModifiedByField = true;
+                            break;
+                        }
+                    }
+                    if (!isModifiedByField)
+                    {
+                        RevertAsset(asset);
+                    }
+                }
+            }
+
             foreach (var group in groups)
             {
                 var vltPath = group.Key;
@@ -209,10 +232,14 @@ namespace FifaAttribDbAppPlugin
                 var vltVanillaData = assetManagementService.GetAssetData(vltEntry, false);
                 var writtenVltData = await new FIFAAttribDbVLTWriter().WriteToBytes(group.ToList(), vltVanillaData);
 
+#if DEBUG
+                DebugBytesToFileLogger.Instance.WriteAllBytes("AttribDbVlt.dat", writtenVltData, $"AttribDb/{ProfileManager.ProfileName}", false);
+#endif
+
                 assetManagementService.ModifyCustomAsset("legacy", vltPath, writtenVltData);
                 // Not important at this time.
                 // TODO: Add edits to the other file too
-                assetManagementService.ModifyCustomAsset("legacy", vltPath.Replace("attribdbgameplay", "attribdb"), writtenVltData);
+                //assetManagementService.ModifyCustomAsset("legacy", vltPath.Replace("attribdbgameplay", "attribdb"), writtenVltData);
 
                 byte[] modifiedBinData = null;
                 if (!string.IsNullOrEmpty(binPath))
@@ -227,32 +254,32 @@ namespace FifaAttribDbAppPlugin
                 }
 
                 // Not important at this time.
-                try
-                {
-                    var bigFile = assetManagementService.EnumerateCustomAssets("legacy").FirstOrDefault(x => x.Name.Contains("gameplayattribdb.big"));
-                    if (bigFile != null)
-                    {
-                        var bigFileService = new BIGFileService();
-                        var big = bigFileService.LoadBig((AssetEntry)bigFile);
-                        var bigAttribDbVlt = big.FirstOrDefault(x => x.Name.Contains("attribdb.vlt", StringComparison.OrdinalIgnoreCase));
-                        _ = bigAttribDbVlt;
+                //try
+                //{
+                //    var bigFile = assetManagementService.EnumerateCustomAssets("legacy").FirstOrDefault(x => x.Name.Contains("gameplayattribdb.big"));
+                //    if (bigFile != null)
+                //    {
+                //        var bigFileService = new BIGFileService();
+                //        var big = bigFileService.LoadBig((AssetEntry)bigFile);
+                //        var bigAttribDbVlt = big.FirstOrDefault(x => x.Name.Contains("attribdb.vlt", StringComparison.OrdinalIgnoreCase));
+                //        _ = bigAttribDbVlt;
 
-                        var bigAttribDbBin = big.FirstOrDefault(x => x.Name.Contains("attribdb.bin", StringComparison.OrdinalIgnoreCase));
-                        _ = bigAttribDbBin;
-                        if (bigAttribDbVlt != null)
-                        {
-                            bigFileService.Import(writtenVltData, bigAttribDbVlt, (AssetEntry)bigFile, big);
-                            if (modifiedBinData != null)
-                                bigFileService.Import(modifiedBinData, bigAttribDbBin, (AssetEntry)bigFile, big);
-                        }
+                //        var bigAttribDbBin = big.FirstOrDefault(x => x.Name.Contains("attribdb.bin", StringComparison.OrdinalIgnoreCase));
+                //        _ = bigAttribDbBin;
+                //        if (bigAttribDbVlt != null)
+                //        {
+                //            bigFileService.Import(writtenVltData, bigAttribDbVlt, (AssetEntry)bigFile, big);
+                //            if (modifiedBinData != null)
+                //                bigFileService.Import(modifiedBinData, bigAttribDbBin, (AssetEntry)bigFile, big);
+                //        }
 
 
-                    }
-                }
-                catch
-                {
+                //    }
+                //}
+                //catch
+                //{
 
-                }
+                //}
             }
 
             
@@ -353,6 +380,7 @@ namespace FifaAttribDbAppPlugin
                     field.ModifiedValue = null;
                 }
             }
+
         }
 
         public bool ModifyAssetEntry(IAssetEntry entry, byte[] data, bool isDataCompressed, bool raiseNotification = true)
