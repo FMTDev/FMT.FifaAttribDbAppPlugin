@@ -34,6 +34,8 @@ namespace FifaAttribDbAppPluginTests
         public ConcurrentDictionary<Guid, ChunkAssetEntry> Chunks { get; private set; } = new ConcurrentDictionary<Guid, ChunkAssetEntry>();
         public InitFSManager InitFSManager { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
+        public bool SuppressNotifications { get; set; }
+
         public event IAssetManagementService.AssetManagerModifiedHandler AssetManagerInitialised;
         public event IAssetManagementService.AssetManagerModifiedHandler AssetManagerModified;
 
@@ -157,7 +159,7 @@ namespace FifaAttribDbAppPluginTests
             throw new NotImplementedException();
         }
 
-        public void InitializeEbxEntriesAndCustomAssets(bool writeToCache)
+        public Task InitializeEbxEntriesAndCustomAssetsAsync(bool writeToCache)
         {
             throw new NotImplementedException();
         }
@@ -173,6 +175,11 @@ namespace FifaAttribDbAppPluginTests
         }
 
         public bool ModifyChunk(ChunkAssetEntry chunkAssetEntry, byte[] buffer, CompressionType compressionOverride = CompressionType.Default, bool addToChunkBundle = false, bool a5 = false)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool ModifyChunk(ChunkAssetEntry chunkAssetEntry, byte[] buffer, ITexture texture, CompressionType compressionOverride = CompressionType.Default, bool addToChunkBundle = false, bool raiseNotification = true)
         {
             throw new NotImplementedException();
         }
@@ -262,6 +269,30 @@ namespace FifaAttribDbAppPluginTests
         }
 
         public void Reset()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void BeginCasReadSession() { }
+
+        public void EndCasReadSession() { }
+
+        public void DuplicateEntry(AssetEntry entryToDuplicate, string newEntryPath)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void DeleteEntry(IAssetEntry entry)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void DeleteEbx(EbxAssetEntry entry)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void DeleteRes(ResAssetEntry entry)
         {
             throw new NotImplementedException();
         }
