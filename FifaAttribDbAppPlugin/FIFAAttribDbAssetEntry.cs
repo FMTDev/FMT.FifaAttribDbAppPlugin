@@ -26,7 +26,7 @@ namespace FifaAttribDbAppPlugin
 
         public long OriginalSize { get; set; }
 
-        public List<int> Bundles { get; set; }
+        public HashSet<int> Bundles { get; }
         public List<ulong> Bundles64 { get; set; }
 
         public string ExtraInformation { get; set; }
@@ -90,6 +90,7 @@ namespace FifaAttribDbAppPlugin
 
         public string VltPath { get; set; }
         public string BinPath { get; set; }
+
 
         public string GetPath()
         {

@@ -5,6 +5,11 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+	<PropertyGroup Condition="'$(Configuration)'=='Release'">
+		<DebugSymbols>False</DebugSymbols>
+		<DebugType>None</DebugType>
+	</PropertyGroup>
+
   <ItemGroup>
     <None Remove="FieldNameHashes.csv" />
   </ItemGroup>
@@ -14,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="FMT.Core" Version="2026.9.3" />
+    <PackageReference Include="FMT.Core" Version="2026.14.1" />
 
   </ItemGroup>
 

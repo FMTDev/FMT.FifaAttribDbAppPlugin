@@ -14,6 +14,11 @@ namespace FifaAttribDbAppPlugin
     {
         private IAssetManagementService assetManagementService => SingletonService.GetInstance<IAssetManagementService>();
 
+        public IEnumerable<CustomAssetEntryEnumeration> GetCustomAssetEntriesEnumerationList()
+        {
+            yield break;
+        }
+
         public Dictionary<string, IEnumerable<IAssetEntry>> GetCustomAssetEntriesEnumerations()
         {
             // This only works in FIFA17, so far

@@ -523,6 +523,17 @@ namespace FifaAttribDbAppPlugin
 
             return existingAsset;
         }
+
+        public bool CanDuplicate => false;
+
+        public IAssetEntry DuplicateAsset(IAssetEntry entryToDuplicate, string newEntryPath)
+        {
+            return null;
+        }
+
+        public void DeleteAsset(IAssetEntry asset)
+        {
+        }
     }
 
     public static class FieldNameHashLoader

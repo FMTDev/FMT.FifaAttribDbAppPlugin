@@ -70,5 +70,16 @@ namespace FMT.ServicesManagers.AssetEntryServicing
         {
             throw new NotImplementedException();
         }
+
+        public bool CanDuplicate => false;
+
+        public IAssetEntry DuplicateAsset(IAssetEntry entryToDuplicate, string newEntryPath)
+        {
+            return null;
+        }
+
+        public void DeleteAsset(IAssetEntry asset)
+        {
+        }
     }
 }
