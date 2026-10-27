@@ -81,5 +81,10 @@ namespace FMT.ServicesManagers.AssetEntryServicing
         public void DeleteAsset(IAssetEntry asset)
         {
         }
+
+        public void AddAsset(IAssetEntry asset)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

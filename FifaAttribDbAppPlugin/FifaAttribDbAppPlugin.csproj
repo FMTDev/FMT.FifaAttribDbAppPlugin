@@ -19,7 +19,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="FMT.Core" Version="2026.14.1" />
+    <PackageReference Include="FMT.Core" Version="2026.15.0" />
+    <PackageReference Include="FMT.Models.Assets" Version="2026.14.0" />
 
   </ItemGroup>
 
