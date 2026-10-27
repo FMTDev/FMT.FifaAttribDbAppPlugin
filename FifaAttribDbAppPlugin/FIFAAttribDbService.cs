@@ -534,6 +534,11 @@ namespace FifaAttribDbAppPlugin
         public void DeleteAsset(IAssetEntry asset)
         {
         }
+
+        public void AddAsset(IAssetEntry asset)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public static class FieldNameHashLoader
