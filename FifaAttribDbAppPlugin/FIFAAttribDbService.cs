@@ -539,6 +539,11 @@ namespace FifaAttribDbAppPlugin
         {
             throw new NotImplementedException();
         }
+
+        public IAssetEntry ReadAssetEntryInfo(NativeReader nativeReader)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public static class FieldNameHashLoader

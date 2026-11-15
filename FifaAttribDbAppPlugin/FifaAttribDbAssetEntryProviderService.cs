@@ -1,4 +1,5 @@
 ﻿using FifaAttribDbAppPlugin;
+using FMT.FileTools;
 using FMT.Hash;
 using FMT.PluginInterfaces.Assets;
 
@@ -68,6 +69,11 @@ namespace FMT.ServicesManagers.AssetEntryServicing
 
         public IAssetEntry ReadAssetEntryInfo(byte[] data)
         {
+            throw new NotImplementedException();
+        }
+
+        public IAssetEntry ReadAssetEntryInfo(NativeReader nativeReader)
+        { 
             throw new NotImplementedException();
         }
 

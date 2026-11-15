@@ -7,7 +7,7 @@ using System.ComponentModel;
 
 namespace FifaAttribDbAppPlugin
 {
-    public class FIFAAttribDbAssetEntry : IAssetEntry, INotifyPropertyChanged
+    public class FIFAAttribDbAssetEntry : AssetEntry, IAssetEntry, INotifyPropertyChanged
     {
         public string Name { get; set; }
 
@@ -27,14 +27,13 @@ namespace FifaAttribDbAppPlugin
         public long OriginalSize { get; set; }
 
         public HashSet<int> Bundles { get; }
-        public List<ulong> Bundles64 { get; set; }
+        public HashSet<ulong> Bundles64 { get; set; }
 
         public string ExtraInformation { get; set; }
         public string Type { get; set; }
         public bool IsLegacy { get; set; }
         public bool IsDirty { get; set; }
         public long Size { get; set; }
-        public IAssetExtraData ExtraData { get; set; }
         public int SB_CAS_Offset_Position { get; set; }
         public int SB_CAS_Size_Position { get; set; }
         public string TOCFileLocation { get; set; }
